@@ -17,7 +17,7 @@ class StaffRegisterSerializer(serializers.ModelSerializer):
         fields = ['name', 'email', 'password', 'role']
 
     def validate_role(self, value):
-        allowed_roles = ['admin', 'kitchen', 'waiter']
+        allowed_roles = ['kitchen', 'waiter']  # removed admin
         if value not in allowed_roles:
             raise serializers.ValidationError(f"Role must be one of {allowed_roles}.")
         return value

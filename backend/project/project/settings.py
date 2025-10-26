@@ -58,6 +58,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'smartdine.User'
 
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -66,6 +68,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
 
 
 SIMPLE_JWT = {
