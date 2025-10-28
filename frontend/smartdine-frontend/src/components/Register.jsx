@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { registerStaff } from "../api/staff"; // your backend API function
+import { registerStaff } from "../api/staff";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -10,22 +11,18 @@ export default function CreateAccount() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setSuccess(false);
 
     if (!agreeToTerms) {
-      setMessage("Please agree to the Terms of Service and Privacy Policy");
+      toast.warning("Please agree to the Terms of Service and Privacy Policy");
       return;
     }
 
     if (password.length < 6) {
-      setMessage("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -37,14 +34,14 @@ export default function CreateAccount() {
         password,
         role,
       });
-      setSuccess(true);
-      setMessage("Account created successfully! Redirecting to login...");
+
+      toast.success("Account created successfully! Please verify your email before logging in 🎉");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       const errorMessages = err.response?.data
         ? Object.values(err.response.data).flat().join(" ")
         : "Error registering. Please try again.";
-      setMessage(errorMessages);
+      toast.error(errorMessages);
     } finally {
       setLoading(false);
     }
@@ -67,7 +64,7 @@ export default function CreateAccount() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0z"
               />
             </svg>
           </div>
@@ -178,20 +175,7 @@ export default function CreateAccount() {
               </label>
             </div>
 
-            {/* Message */}
-            {message && (
-              <div
-                className={`mb-4 p-3 rounded-lg ${
-                  success
-                    ? "bg-green-50 border border-green-200 text-green-600"
-                    : "bg-red-50 border border-red-200 text-red-600"
-                }`}
-              >
-                {message}
-              </div>
-            )}
-
-            {/* Button */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}

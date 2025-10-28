@@ -1,47 +1,55 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginStaff } from "../api/staff"; // your API function
+import { loginStaff } from "../api/staff"; 
 import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // use context for auth
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage("");
     setLoading(true);
+
     try {
       const res = await loginStaff({ email, password });
       const { user, access, refresh } = res.data;
 
-      // Call context login
+      // Save tokens
       login({ role: user.role, access, refresh });
-
-      // Store refresh token if "Remember me"
       if (rememberMe) localStorage.setItem("refresh", refresh);
 
-      setMessage("Login successful! Redirecting...");
+      toast.success("Login successfull 🎉");
 
-      // Redirect based on role after short delay
+      // Redirect after a short delay
       setTimeout(() => {
         if (user.role === "admin") navigate("/admin-dashboard");
         else if (user.role === "kitchen") navigate("/kitchen-dashboard");
         else if (user.role === "waiter") navigate("/waiter-dashboard");
         else navigate("/");
-      }, 1000);
+      }, 1200);
     } catch (err) {
       console.error(err);
-      setMessage(
+      const errorMessage =
         err.response?.data?.non_field_errors?.[0] ||
-          err.response?.data?.detail ||
-          "Login failed. Check credentials."
-      );
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Login failed. Check your email or password.";
+
+      // Handle specific cases
+      if (errorMessage.toLowerCase().includes("verify")) {
+        toast.info("Please verify your email before logging in.");
+      } else if (errorMessage.toLowerCase().includes("inactive")) {
+        toast.warning("Your account is not yet approved by admin.");
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -50,7 +58,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo and Header */}
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-500 rounded-2xl mb-4">
             <svg
@@ -73,47 +81,42 @@ export default function Login() {
           <p className="text-gray-600">Sign in to your SmartDine account</p>
         </div>
 
-        {/* Login Card */}
+        {/* Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          {/* Login Form */}
           <form onSubmit={handleLogin}>
-            {/* Email Input */}
+            {/* Email */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  placeholder="admin@smartdine.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="username"
-                  className="w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                />
-              </div>
+              <input
+                type="email"
+                placeholder="admin@smartdine.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="username"
+                className="w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              />
             </div>
 
-            {/* Password Input */}
+            {/* Password */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                />
-              </div>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              />
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember / Forgot */}
             <div className="flex items-center justify-between mb-6">
               <label className="flex items-center cursor-pointer">
                 <input
@@ -133,27 +136,27 @@ export default function Login() {
               </button>
             </div>
 
-            {/* Error / Success Message */}
-            {message && (
-              <div className="mb-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-600">
-                {message}
-              </div>
-            )}
-
-            {/* Sign In Button */}
+            {/* Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? "Logging in..." : "Sign In"}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Logging in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
         </div>
 
-        {/* Create Account Link */}
+        {/* Register Link */}
         <p className="text-center mt-6 text-gray-600">
-          Don't have an account?{" "}
+          Don’t have an account?{" "}
           <button
             onClick={() => navigate("/register")}
             className="text-blue-500 hover:text-blue-600 font-medium"
@@ -162,7 +165,6 @@ export default function Login() {
           </button>
         </p>
 
-        {/* Footer */}
         <p className="text-center mt-8 text-sm text-gray-500">
           SmartDine Restaurant Management System
         </p>

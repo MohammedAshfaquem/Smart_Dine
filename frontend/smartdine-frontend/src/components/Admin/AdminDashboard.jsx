@@ -1,16 +1,40 @@
+// src/pages/admin/AdminDashboard.jsx
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import RequestsTab from "./RequestsTab";
+// import DashboardTab from "./DashboardTab";
+// import ReportsTab from "./ReportsTab";
+// import SettingsTab from "./SettingsTab";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("requests");
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [pendingCount, setPendingCount] = useState(0);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar setActiveTab={setActiveTab} activeTab={activeTab} />
-      <div style={{ flex: 1, padding: "20px" }}>
-        {activeTab === "requests" && <RequestsTab />}
-        {/* Add other tabs components here */}
+    <div className="flex min-h-screen bg-gray-100">
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        pendingCount={pendingCount}
+        setPendingCount={setPendingCount}
+      />
+
+      <div className="flex-1">
+        {activeTab === "dashboard" && (
+          <div className="p-6 text-gray-800">
+            <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
+            <p>Welcome to the SmartDine Admin Dashboard.</p>
+          </div>
+        )}
+        {activeTab === "requests" && (
+          <RequestsTab setPendingCount={setPendingCount} />
+        )}
+        {activeTab === "reports" && (
+          <div className="p-6 text-gray-800">Reports content here...</div>
+        )}
+        {activeTab === "settings" && (
+          <div className="p-6 text-gray-800">Settings page...</div>
+        )}
       </div>
     </div>
   );

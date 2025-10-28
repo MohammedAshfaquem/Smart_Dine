@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function RequestPasswordReset() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
-    setSuccess(false);
 
     try {
       const res = await fetch(
@@ -27,24 +24,20 @@ export default function RequestPasswordReset() {
       const data = await res.json();
 
       if (res.ok) {
-        setSuccess(true);
-        setMessage("Password reset link sent! Check your email.");
+        toast.success("Password reset link sent! Check your email.");
+        setTimeout(() => navigate("/login"), 3000);
       } else {
-        setSuccess(false);
-        setMessage(data.error || "Something went wrong!");
+        toast.error(data.error || "❌ Something went wrong!");
       }
     } catch (err) {
       console.error(err);
-      setSuccess(false);
-      setMessage("Network error. Please try again!");
+      toast.error("⚠️ Network error. Please try again!");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBackToLogin = () => {
-    navigate("/login");
-  };
+  const handleBackToLogin = () => navigate("/login");
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -66,8 +59,12 @@ export default function RequestPasswordReset() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-gray-800 mb-2">Forgot Password?</h1>
-          <p className="text-gray-600">Enter your email and we'll send you a reset link</p>
+          <h1 className="text-2xl font-semibold text-gray-800 mb-2">
+            Forgot Password?
+          </h1>
+          <p className="text-gray-600">
+            Enter your email and we'll send you a reset link
+          </p>
         </div>
 
         {/* Reset Card */}
@@ -101,19 +98,6 @@ export default function RequestPasswordReset() {
               />
             </div>
           </div>
-
-          {/* Message */}
-          {message && (
-            <div
-              className={`mb-4 p-3 rounded-lg ${
-                success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"
-              }`}
-            >
-              <p className={`text-sm ${success ? "text-green-600" : "text-red-600"}`}>
-                {message}
-              </p>
-            </div>
-          )}
 
           {/* Send Reset Link Button */}
           <button
