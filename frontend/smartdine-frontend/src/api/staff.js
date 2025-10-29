@@ -1,20 +1,16 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000"; // your Django backend
+const API_URL = "http://localhost:8000";
 
-// Register staff
 export const registerStaff = (data) =>
   axios.post(`${API_URL}/auth/staff/register/`, data);
 
-// Verify email token
 export const verifyEmail = (token) =>
   axios.get(`${API_URL}/auth/staff/verify-email/${token}/`);
 
-// Login staff
 export const loginStaff = (data) =>
   axios.post(`${API_URL}/auth/staff/login/`, data);
 
-// 🟢 Create Axios instance with interceptor to auto-refresh tokens
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -23,7 +19,6 @@ api.interceptors.request.use(async (config) => {
   let access = sessionStorage.getItem("access");
   const refresh = localStorage.getItem("refresh");
 
-  // Optional: refresh access token if expired
   if (!access && refresh) {
     try {
       const res = await axios.post(`${API_URL}/auth/token/refresh/`, {
@@ -41,7 +36,6 @@ api.interceptors.request.use(async (config) => {
   if (access) {
     config.headers.Authorization = `Bearer ${access}`;
   }
-
   return config;
 });
 

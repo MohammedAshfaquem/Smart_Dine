@@ -2,28 +2,27 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { PendingCountContext } from "../../context/PendingCountContext";
+import ConfirmationModal from "../ConfirmationModal.jsx";
 
 export default function RequestsTab() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState(null); // for modal
+  const [showModal, setShowModal] = useState(false);
+
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
-  const { setPendingCount } = useContext(PendingCountContext); // ✅ Shared sidebar count
+  const { setPendingCount } = useContext(PendingCountContext);
 
-  // 🔹 Fetch pending requests on load
   useEffect(() => {
-    const token =
-      sessionStorage.getItem("access") || localStorage.getItem("access");
-
+    const token = sessionStorage.getItem("access") || localStorage.getItem("access");
     if (token) {
       fetchPendingRequests(token);
     } else {
-      console.warn("⚠️ No token found. Redirecting to login.");
       navigate("/login");
     }
   }, []);
 
-  // ✅ Fetch all pending users
   const fetchPendingRequests = async (token) => {
     try {
       setLoading(true);
@@ -36,7 +35,6 @@ export default function RequestsTab() {
       });
 
       if (res.status === 401) {
-        console.warn("Token expired or invalid, logging out...");
         logout();
         return;
       }
@@ -48,7 +46,7 @@ export default function RequestsTab() {
 
       const data = await res.json();
       setRequests(data);
-      setPendingCount(data.length); // ✅ Update sidebar badge
+      setPendingCount(data.length);
     } catch (err) {
       console.error("Error fetching requests:", err);
     } finally {
@@ -56,32 +54,26 @@ export default function RequestsTab() {
     }
   };
 
-  // ✅ Approve user
   const approveUser = async (id) => {
-    const token =
-      sessionStorage.getItem("access") || localStorage.getItem("access");
+    const token = sessionStorage.getItem("access") || localStorage.getItem("access");
     if (!token) {
-      alert("Please login first.");
       navigate("/login");
       return;
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:8000/api/admin/approve-user/${id}/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`http://localhost:8000/api/admin/approve-user/${id}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (res.ok) {
         const data = await res.json();
-        alert(`✅ ${data.detail || "User approved successfully"}`);
-        fetchPendingRequests(token); // ✅ Refresh both table & sidebar
+        
+        fetchPendingRequests(token);
       } else if (res.status === 403) {
         alert("❌ You are not authorized to approve users.");
       } else {
@@ -90,68 +82,45 @@ export default function RequestsTab() {
       }
     } catch (err) {
       console.error("Error approving user:", err);
-      alert("An error occurred while approving user.");
     }
   };
 
-  // ✅ Reject user (optional)
-  const rejectUser = async (id) => {
-    if (!window.confirm("Are you sure you want to reject this request?")) return;
-    alert(`Rejecting user ${id}...`);
-    // TODO: connect with backend reject endpoint
-    setRequests((prev) => {
-      const updated = prev.filter((r) => r.id !== id);
-      setPendingCount(updated.length); // ✅ Update sidebar
-      return updated;
-    });
+  const handleApproveClick = (req) => {
+    setSelectedRequest(req);
+    setShowModal(true);
   };
 
-  // ✅ Logout handler
-  const handleLogout = () => {
-    logout();
+  const handleConfirmApprove = () => {
+    if (selectedRequest) approveUser(selectedRequest.id);
+    setShowModal(false);
   };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 mb-1">
             Pending Requests
           </h1>
           <p className="text-gray-600">
-            Welcome back,{" "}
-            <span className="font-medium">
-              {user?.name || "Admin User"}
-            </span>
+            Welcome back, <span className="font-medium">{user?.name || "Admin User"}</span>
           </p>
         </div>
-
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          Logout
-        </button>
       </div>
 
-      {/* Requests Table / Card */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">
             Pending Approval Requests
           </h2>
         </div>
 
-        {/* Loading */}
         {loading ? (
           <div className="p-12 text-center">
-            <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="inline-block w-8 h-8 border-4 border-[#059669] border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-4 text-gray-600">Loading pending requests...</p>
           </div>
         ) : requests.length === 0 ? (
-          // Empty state
           <div className="p-12 text-center">
             <svg
               className="w-16 h-16 mx-auto text-gray-300 mb-4"
@@ -172,7 +141,6 @@ export default function RequestsTab() {
             </p>
           </div>
         ) : (
-          // Table
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -196,37 +164,20 @@ export default function RequestsTab() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {requests.map((req, index) => (
-                  <tr
-                    key={req.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
+                  <tr key={req.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-900">
                       REQ-{String(index + 1).padStart(3, "0")}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {req.name}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {req.email}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {req.role}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{req.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{req.email}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{req.role}</td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => approveUser(req.id)}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => rejectUser(req.id)}
-                          className="px-4 py-2 bg-white hover:bg-red-50 text-red-600 border border-red-600 text-sm font-medium rounded-lg transition-colors"
-                        >
-                          Reject
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleApproveClick(req)}
+                        className="px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Approve
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -235,6 +186,17 @@ export default function RequestsTab() {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={showModal}
+        title="Approve User?"
+        message={`Are you sure you want to approve ${selectedRequest?.name}?`}
+        onConfirm={handleConfirmApprove}
+        onCancel={() => setShowModal(false)}
+        type="approve"
+        confirmText="Approve"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

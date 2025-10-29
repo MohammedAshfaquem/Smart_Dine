@@ -11,9 +11,7 @@ from .models import (
     Feedback,
 )
 
-# ---------------------------
-# User (Staff) Admin
-# ---------------------------
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "email", "role", "is_active", "isBlocked", "is_email_verified", "is_approved_by_admin")
@@ -22,9 +20,7 @@ class UserAdmin(admin.ModelAdmin):
     ordering = ("id",)
 
 
-# ---------------------------
-# Table Admin
-# ---------------------------
+
 @admin.register(Table)
 class TableAdmin(admin.ModelAdmin):
     list_display = ("id", "table_number", "seats", "status", "created_at", "updated_at")
@@ -32,9 +28,7 @@ class TableAdmin(admin.ModelAdmin):
     search_fields = ("table_number",)
 
 
-# ---------------------------
-# MenuItem Admin
-# ---------------------------
+
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "category", "price", "availability", "created_at", "updated_at")
@@ -42,9 +36,6 @@ class MenuItemAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-# ---------------------------
-# Cart & CartItem Admin
-# ---------------------------
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
     list_display = ("id", "table", "created_at", "updated_at")
@@ -55,9 +46,6 @@ class CartItemAdmin(admin.ModelAdmin):
     list_display = ("id", "cart", "menu_item", "quantity")
 
 
-# ---------------------------
-# Order & OrderItem Admin
-# ---------------------------
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("id", "table", "total", "status", "created_at", "updated_at")
@@ -70,18 +58,12 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = ("id", "order", "menu_item", "quantity", "price")
 
 
-# ---------------------------
-# WaiterRequest Admin
-# ---------------------------
 @admin.register(WaiterRequest)
 class WaiterRequestAdmin(admin.ModelAdmin):
     list_display = ("id", "table", "type", "status", "created_at", "updated_at")
     list_filter = ("type", "status")
 
 
-# ---------------------------
-# Feedback Admin
-# ---------------------------
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ("id", "table", "order", "rating", "comment", "created_at", "updated_at")

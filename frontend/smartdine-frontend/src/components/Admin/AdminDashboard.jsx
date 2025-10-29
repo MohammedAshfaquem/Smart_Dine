@@ -1,10 +1,7 @@
-// src/pages/admin/AdminDashboard.jsx
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import RequestsTab from "./RequestsTab";
-// import DashboardTab from "./DashboardTab";
-// import ReportsTab from "./ReportsTab";
-// import SettingsTab from "./SettingsTab";
+
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");

@@ -1,4 +1,3 @@
-// src/context/PendingCountContext.jsx
 import { createContext, useState, useEffect } from "react";
 
 export const PendingCountContext = createContext();
@@ -6,7 +5,6 @@ export const PendingCountContext = createContext();
 export const PendingCountProvider = ({ children }) => {
   const [pendingCount, setPendingCount] = useState(0);
 
-  // ✅ Fetch count initially when app loads
   useEffect(() => {
     const token =
       sessionStorage.getItem("access") || localStorage.getItem("access");

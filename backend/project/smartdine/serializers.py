@@ -6,9 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
-# -----------------------------
-# Staff Registration Serializer
-# -----------------------------
+
 class StaffRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
 
@@ -17,7 +15,7 @@ class StaffRegisterSerializer(serializers.ModelSerializer):
         fields = ['name', 'email', 'password', 'role']
 
     def validate_role(self, value):
-        allowed_roles = ['kitchen', 'waiter']  # removed admin
+        allowed_roles = ['kitchen', 'waiter'] 
         if value not in allowed_roles:
             raise serializers.ValidationError(f"Role must be one of {allowed_roles}.")
         return value
@@ -27,9 +25,8 @@ class StaffRegisterSerializer(serializers.ModelSerializer):
         user = super().create(validated_data)
         return user
 
-# -----------------------------
-# Staff Login Serializer
-# -----------------------------
+
+
 class StaffLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)

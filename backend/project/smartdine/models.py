@@ -2,9 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser,BaseUserManager,AbstractBaseUser,PermissionsMixin
 import uuid
 
-# ---------------------------
-# User Model (Staff Only)
-# ---------------------------
+
 class UserManager(BaseUserManager):
     def create_user(self, email, name, role='waiter', password=None, **extra_fields):
         if not email:
@@ -55,9 +53,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 
-# ---------------------------
-# Table Model
-# ---------------------------
 class Table(models.Model):
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -76,9 +71,7 @@ class Table(models.Model):
         return f"Table {self.table_number} ({self.status})"
 
 
-# ---------------------------
-# Menu Item Model
-# ---------------------------
+
 class MenuItem(models.Model):
     CATEGORY_CHOICES = [
         ('starter', 'Starter'),
@@ -100,9 +93,6 @@ class MenuItem(models.Model):
         return self.name
 
 
-# ---------------------------
-# Cart & CartItem (Customer Cart)
-# ---------------------------
 class Cart(models.Model):
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -121,9 +111,7 @@ class CartItem(models.Model):
         return f"{self.menu_item.name} x{self.quantity}"
 
 
-# ---------------------------
-# Order & OrderItem
-# ---------------------------
+
 class Order(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -152,9 +140,6 @@ class OrderItem(models.Model):
         return f"{self.menu_item.name} x{self.quantity}"
 
 
-# ---------------------------
-# Waiter Requests
-# ---------------------------
 class WaiterRequest(models.Model):
     TYPE_CHOICES = [
         ('need water', 'Need Water'),
@@ -176,9 +161,7 @@ class WaiterRequest(models.Model):
         return f"{self.type} - Table {self.table.table_number}"
 
 
-# ---------------------------
-# Feedback
-# ---------------------------
+
 class Feedback(models.Model):
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
