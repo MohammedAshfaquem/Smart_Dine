@@ -1,6 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser,BaseUserManager,AbstractBaseUser,PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser, BaseUserManager, PermissionsMixin
+)
 import uuid
+import qrcode
+from io import BytesIO
+from django.core.files import File
+
 
 
 class UserManager(BaseUserManager):
@@ -8,12 +14,18 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("Email must be provided")
         email = self.normalize_email(email)
-        user = self.model(email=email, name=name, role=role, is_active=False, **extra_fields)
+        user = self.model(
+            email=email,
+            name=name,
+            role=role,
+            is_active=False,
+            **extra_fields
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, password, **extra_fields):
+    def create_superuser(self, email, name, password=None, **extra_fields):
         user = self.create_user(email, name, role='admin', password=password, **extra_fields)
         user.is_staff = True
         user.is_superuser = True
@@ -38,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    isBlocked = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
     is_approved_by_admin = models.BooleanField(default=False)
     email_verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -59,18 +71,33 @@ class Table(models.Model):
         ('occupied', 'Occupied'),
         ('reserved', 'Reserved'),
     ]
-    table_number = models.IntegerField(unique=True)
-    seats = models.IntegerField()
-    qr_code = models.CharField(max_length=255, unique=True)
+
+    table_number = models.PositiveIntegerField(unique=True)
+    seats = models.PositiveIntegerField(default=4)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
-    
+    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        """
+        Save the Table instance, then generate and attach a QR code image.
+        The QR will contain a link to the frontend table page.
+        """
+        super().save(*args, **kwargs)
+
+        qr_data = f"http://localhost:3001/table/{self.table_number}/"
+
+        # Create QR image
+        qr_img = qrcode.make(qr_data)
+        buffer = BytesIO()
+        qr_img.save(buffer, format="PNG")
+        file_name = f"table_{self.table_number}_qr.png"
+        self.qr_code.save(file_name, File(buffer), save=False)
+        super().save(update_fields=['qr_code'])
+
     def __str__(self):
-        return f"Table {self.table_number} ({self.status})"
-
-
+        return f"Table {self.table_number}"
 
 class MenuItem(models.Model):
     CATEGORY_CHOICES = [
@@ -79,13 +106,13 @@ class MenuItem(models.Model):
         ('dessert', 'Dessert'),
         ('drink', 'Drink'),
     ]
+
     name = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     image = models.ImageField(upload_to='menu/', null=True, blank=True)
     availability = models.BooleanField(default=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -110,8 +137,6 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.menu_item.name} x{self.quantity}"
 
-
-
 class Order(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -119,10 +144,10 @@ class Order(models.Model):
         ('ready', 'Ready'),
         ('served', 'Served'),
     ]
+
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -146,11 +171,13 @@ class WaiterRequest(models.Model):
         ('need bill', 'Need Bill'),
         ('clean table', 'Clean Table'),
     ]
+
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('in-progress', 'In Progress'),
         ('completed', 'Completed'),
     ]
+
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -159,7 +186,6 @@ class WaiterRequest(models.Model):
 
     def __str__(self):
         return f"{self.type} - Table {self.table.table_number}"
-
 
 
 class Feedback(models.Model):
@@ -172,5 +198,3 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Feedback for Table {self.table.table_number} - {self.rating} Stars"
-
-# Create your models here.

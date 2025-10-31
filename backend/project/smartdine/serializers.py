@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Table
 
 User = get_user_model()
 
@@ -50,3 +51,16 @@ class StaffLoginSerializer(serializers.Serializer):
                 }
             }
         raise serializers.ValidationError("Invalid email or password.")
+    
+class TableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Table
+        fields = ['id', 'table_number', 'seats', 'status']
+        
+class StaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'role', 'is_active', 'is_blocked']
+
+
+

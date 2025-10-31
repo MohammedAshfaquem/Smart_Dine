@@ -11,66 +11,31 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import TablePage from "./components/customer/TablePage";
+import CustomerDashboard from "./components/customer/CustomerDashboard";
+import QRPage from "./components/customer/QRPage";
 
 function App() {
   return (
     <>
-      {" "}
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        {/* 👇 Set this as the first page */}
+        <Route path="/" element={<QRPage />} />
 
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
+        {/* existing routes below */}
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
-        <Route
-          path="/request-password-reset"
-          element={<RequestPasswordReset />}
-        />
-        <Route
-          path="/reset-password/:userId/:token"
-          element={<ResetPassword />}
-        />
+        <Route path="/request-password-reset" element={<RequestPasswordReset />} />
+        <Route path="/reset-password/:userId/:token" element={<ResetPassword />} />
+        <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/kitchen-dashboard" element={<ProtectedRoute allowedRoles={["kitchen"]}><KitchenDashboard /></ProtectedRoute>} />
+        <Route path="/waiter-dashboard" element={<ProtectedRoute allowedRoles={["waiter"]}><WaiterDashboard /></ProtectedRoute>} />
 
-        <Route
-          path="/admin-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/kitchen-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["kitchen"]}>
-              <KitchenDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/waiter-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["waiter"]}>
-              <WaiterDashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/table/:tableId" element={<TablePage />} />
+        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
 
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </>

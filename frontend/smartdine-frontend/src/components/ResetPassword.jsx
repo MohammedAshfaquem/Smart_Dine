@@ -56,7 +56,6 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] to-[#ecfdf5] flex items-center justify-center p-6 md:p-8">
       <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden max-w-5xl w-full">
 
-        {/* LEFT SIDE - Hidden on small screens */}
         <div className="hidden md:flex w-2/5 bg-gradient-to-br from-[#059669] to-[#047857] p-12 flex-col justify-center text-white">
           <div className="max-w-sm">
             <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center mb-4 shadow-md">
@@ -72,7 +71,6 @@ export default function ResetPassword() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="w-full md:w-3/5 p-8 md:p-12 flex items-center bg-white">
           <div className="max-w-md mx-auto w-full">
             <div className="mb-8 text-center">
@@ -85,7 +83,6 @@ export default function ResetPassword() {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {/* Password Field */}
               <div className="mb-5">
                 <label className="block text-sm font-semibold text-[#1F2937] mb-2">
                   New Password
@@ -156,7 +153,6 @@ export default function ResetPassword() {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div className="mb-8">
                 <label className="block text-sm font-semibold text-[#1F2937] mb-2">
                   Confirm Password
@@ -171,7 +167,6 @@ export default function ResetPassword() {
                 />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -187,7 +182,6 @@ export default function ResetPassword() {
                 )}
               </button>
 
-              {/* Back to Login */}
               <button
                 type="button"
                 onClick={() => navigate("/login")}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import RequestsTab from "./RequestsTab";
-
+import StaffManagement from "./StaffManagement";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
         {activeTab === "requests" && (
           <RequestsTab setPendingCount={setPendingCount} />
         )}
+        {activeTab === "staff" && <StaffManagement />} {/* 👈 Added here */}
         {activeTab === "reports" && (
           <div className="p-6 text-gray-800">Reports content here...</div>
         )}
