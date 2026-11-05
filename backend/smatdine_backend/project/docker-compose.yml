@@ -1,0 +1,30 @@
+services:
+  smartdine_backend:
+    image: smartdine_backend:prod
+    container_name: smartdine_container
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - "C:/Users/Afi/Desktop/Smart Dine/backend/project:/app"
+      # Or simply use:
+      # - .:/app
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+      UNSPLASH_ACCESS_KEY: ${UNSPLASH_ACCESS_KEY}
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    restart: unless-stopped
+
+volumes:
+  smartdine_db_data:

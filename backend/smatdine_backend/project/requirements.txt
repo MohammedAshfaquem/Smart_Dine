@@ -1,0 +1,50 @@
+# ===============================
+# 🧱 Core Django Framework
+# ===============================
+Django>=5.0,<6.0
+
+# ===============================
+# ⚙️ Django REST Framework & Auth
+# ===============================
+djangorestframework>=3.15.0
+djangorestframework-simplejwt>=5.3.1
+
+# ===============================
+# 🗄️ Database & Environment
+# ===============================
+psycopg2-binary>=2.9.9          # PostgreSQL adapter
+dj-database-url>=2.2.0          # Parse DATABASE_URL for Heroku/Docker
+python-dotenv>=1.0.1            # Load environment variables from .env
+python-decouple>=3.8             # Simpler .env handling
+
+# ===============================
+# 🔗 Frontend Integration (React)
+# ===============================
+django-cors-headers>=4.4.0      # Allow CORS for frontend API calls
+
+# ===============================
+# 🚀 Web Server
+# ===============================
+gunicorn>=21.2.0                # Production WSGI server
+reportlab>=4.0.0
+
+openpyxl>=3.1.2
+# ===============================
+# 🖼️ Media, Images & QR
+# ===============================
+Pillow>=10.3.0                  # Image processing
+qrcode[pil]                     # QR Code generation
+
+# ===============================
+# 🌐 HTTP & API Requests
+# ===============================
+requests>=2.31.0                # HTTP client for external API calls
+
+# ===============================
+# 🤖 AI & Gemini Integration
+# ===============================
+google-generativeai>=0.8.5
+# ===============================
+# 🧰 Utility Tools
+# ===============================
+django-extensions>=3.2.3        # Optional dev tools (shell_plus, etc.)
